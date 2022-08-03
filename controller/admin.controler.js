@@ -47,12 +47,38 @@ const adminCtrl = {
         res.status(200).json( generateResponseMessage(200, null, user));
     },
     async changeUserInfo(req, res) {
-        await UserModel.findByIdAndUpdate(req.params.id, req.body);
+        const { email, phone } = req.body;
+        console.log(req.body);
+        console.log(email, phone);
+        if (email) {
+            const users = await UserModel.findOne({ email });
+            if (users) return res.status(409).json(generateResponseMessage(409, 'User email already exists', null));
+        }
+
+        if (phone) {
+            const usersPhone = await UserModel.findOne({ phone });
+            if (usersPhone) return res.status(409).json(generateResponseMessage(409, 'User phone already exists', null));
+        }
+
+        if (req.file) {
+            await UserModel.findByIdAndUpdate(req.params.id, {
+                profilePicture: req.file.path,
+                ...req.body,
+            });
+        }else {
+            await UserModel.findByIdAndUpdate(req.params.id, req.body);
+        }
+
         res.status(200).json( generateResponseMessage(200, "User info updated", null));
     },
     async deleteUser(req, res) {
-        await UserModel.findByIdAndDelete(req.params.id);
-        res.status(204).json( generateResponseMessage(204, "User deleted succesfully", null));
+        const user = await UserModel.findByIdAndDelete(req.params.id);
+        if (user){ 
+            res.status(204).json( generateResponseMessage(204, 'User deleted successfully', null));
+        }
+        else {
+            res.status(404).json( generateResponseMessage(404, 'User not found', null));
+        }
     }
 }
 

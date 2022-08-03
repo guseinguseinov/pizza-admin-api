@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+        unique: true,
     },
     email: {
         type: String,
@@ -46,7 +47,8 @@ const UserSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean,
         default: false,
-    }
+    },
+    cart: [{ type: "ObjectId", ref: "carts"}],
 }, {
     timestamps: true
 });
